@@ -396,7 +396,7 @@ html_code = r"""
           <input
             type="text"
             id="name"
-            placeholder="What do they call ya?"
+            placeholder="Enter your name"
             required
           >
         </div>
@@ -422,11 +422,11 @@ html_code = r"""
         </div>
 
         <div class="form-group">
-          <label>Create a Password</label>
+          <label>Notes</label>
           <input
             type="password"
             id="password"
-            placeholder="Make it secret, make it strong!"
+            placeholder="Anything you would like me to know?"
             required
           >
         </div>
