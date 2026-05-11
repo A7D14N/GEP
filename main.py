@@ -17,352 +17,458 @@ html_code = r"""
 <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
-  *, *::before, *::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --purple: #1a0533;
+  --deep: #0d0020;
+  --orange: #ff6b00;
+  --pink: #ff1d8e;
+  --yellow: #ffe600;
+  --teal: #00e5cc;
+  --white: #ffffff;
+}
+
+body {
+  background: var(--deep);
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  color: var(--white);
+}
+
+.scene {
+  position: relative;
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 40px 20px;
+}
+
+.stars,
+.notes-float {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: white;
+
+  animation:
+    twinkle var(--dur, 3s)
+    ease-in-out infinite
+    var(--delay, 0s);
+}
+
+.note {
+  position: absolute;
+  color: var(--yellow);
+  opacity: 0;
+
+  animation:
+    floatUp var(--dur, 8s)
+    ease-in-out infinite
+    var(--delay, 0s);
+}
+
+@keyframes twinkle {
+  0%,100% {
+    opacity: 0.1;
+    transform: scale(1);
   }
 
-  :root {
-    --purple: #1a0533;
-    --deep: #0d0020;
-    --orange: #ff6b00;
-    --pink: #ff1d8e;
-    --yellow: #ffe600;
-    --teal: #00e5cc;
-    --white: #fff;
-  }
-
-  body {
-    background: var(--deep);
-    font-family: 'Nunito', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-    color: var(--white);
-  }
-
-  .scene {
-    position: relative;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-  }
-
-  .bg-guitarist {
-    position: fixed;
-    right: -40px;
-    bottom: 0;
-    width: 55vw;
-    max-width: 700px;
-    opacity: 0.18;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .stars {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    overflow: hidden;
-  }
-
-  .star {
-    position: absolute;
-    background: var(--white);
-    border-radius: 50%;
-    animation: twinkle var(--dur, 3s) ease-in-out infinite var(--delay, 0s);
-  }
-
-  @keyframes twinkle {
-    0%, 100% { opacity: 0.1; transform: scale(1); }
-    50% { opacity: 0.9; transform: scale(1.4); }
-  }
-
-  .notes-float {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    overflow: hidden;
-  }
-
-  .note {
-    position: absolute;
-    font-size: 24px;
-    animation: floatUp var(--dur, 8s) ease-in-out infinite var(--delay, 0s);
-    opacity: 0;
-    color: var(--yellow);
-  }
-
-  @keyframes floatUp {
-    0% { opacity: 0; transform: translateY(0) rotate(0deg); }
-    20% { opacity: 0.7; }
-    80% { opacity: 0.3; }
-    100% { opacity: 0; transform: translateY(-80vh) rotate(30deg); }
-  }
-
-  .card {
-    position: relative;
-    z-index: 10;
-    background: rgba(26, 5, 51, 0.82);
-    backdrop-filter: blur(18px);
-    border: 2px solid rgba(255, 107, 0, 0.4);
-    border-radius: 32px;
-    padding: 48px 52px;
-    max-width: 560px;
-    width: 100%;
-    box-shadow: 0 0 60px rgba(255, 29, 142, 0.15), 0 0 120px rgba(255, 107, 0, 0.1);
-  }
-
-  .logo-ring {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--orange), var(--pink));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 20px;
-    font-size: 32px;
-    box-shadow: 0 0 30px rgba(255, 107, 0, 0.5);
-    animation: pulse-ring 2.5s ease-in-out infinite;
-  }
-
-  @keyframes pulse-ring {
-    0%, 100% {
-      box-shadow: 0 0 20px rgba(255, 107, 0, 0.4);
-      transform: scale(1);
-    }
-
-    50% {
-      box-shadow: 0 0 50px rgba(255, 107, 0, 0.7),
-                  0 0 80px rgba(255, 29, 142, 0.3);
-      transform: scale(1.05);
-    }
-  }
-
-  .school-name {
-    font-family: 'Pacifico', cursive;
-    font-size: 13px;
-    color: var(--orange);
-    text-align: center;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 6px;
+  50% {
     opacity: 0.9;
+    transform: scale(1.4);
+  }
+}
+
+@keyframes floatUp {
+  0% {
+    opacity: 0;
+    transform: translateY(0) rotate(0deg);
   }
 
-  h1 {
-    font-family: 'Pacifico', cursive;
-    font-size: 34px;
-    text-align: center;
-    line-height: 1.2;
-    margin-bottom: 10px;
-    background: linear-gradient(
+  20% {
+    opacity: 0.7;
+  }
+
+  80% {
+    opacity: 0.3;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-80vh) rotate(30deg);
+  }
+}
+
+.card {
+  position: relative;
+  z-index: 10;
+
+  width: 100%;
+  max-width: 580px;
+
+  padding: 48px 52px;
+
+  border-radius: 32px;
+
+  background: rgba(26, 5, 51, 0.82);
+
+  border: 2px solid rgba(255, 107, 0, 0.35);
+
+  backdrop-filter: blur(18px);
+
+  box-shadow:
+    0 0 60px rgba(255, 29, 142, 0.15),
+    0 0 120px rgba(255, 107, 0, 0.08);
+}
+
+.logo-ring {
+  width: 76px;
+  height: 76px;
+
+  margin: 0 auto 20px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 34px;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--orange),
+      var(--pink)
+    );
+
+  animation: pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+  0%,100% {
+    transform: scale(1);
+
+    box-shadow:
+      0 0 20px rgba(255,107,0,0.4);
+  }
+
+  50% {
+    transform: scale(1.05);
+
+    box-shadow:
+      0 0 50px rgba(255,107,0,0.7),
+      0 0 80px rgba(255,29,142,0.25);
+  }
+}
+
+.school-name {
+  text-align: center;
+
+  color: var(--orange);
+
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+
+  margin-bottom: 6px;
+
+  font-family: 'Pacifico', cursive;
+}
+
+h1 {
+  text-align: center;
+
+  margin-bottom: 10px;
+
+  font-size: 38px;
+  line-height: 1.2;
+
+  font-family: 'Pacifico', cursive;
+
+  background:
+    linear-gradient(
       135deg,
       #fff 0%,
       var(--yellow) 50%,
       var(--orange) 100%
     );
 
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 
-  .tagline {
-    text-align: center;
-    color: rgba(255,255,255,0.55);
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 36px;
-    letter-spacing: 0.05em;
-  }
+.tagline {
+  text-align: center;
 
-  .form-group {
-    margin-bottom: 20px;
-  }
+  margin-bottom: 36px;
 
-  label {
-    display: block;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--orange);
-    margin-bottom: 8px;
-  }
+  color: rgba(255,255,255,0.55);
 
-  input[type="text"],
-  input[type="email"],
-  input[type="tel"],
-  input[type="password"] {
-    width: 100%;
-    background: rgba(255,255,255,0.06);
-    border: 1.5px solid rgba(255,255,255,0.15);
-    border-radius: 14px;
-    color: var(--white);
-    font-family: 'Nunito', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    padding: 14px 18px;
-    outline: none;
-    transition: border-color 0.25s,
-                background 0.25s,
-                box-shadow 0.25s;
-  }
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
 
-  input::placeholder {
-    color: rgba(255,255,255,0.3);
-    font-weight: 400;
-  }
+.form-group {
+  margin-bottom: 20px;
+}
 
-  input:focus {
-    border-color: var(--orange);
-    background: rgba(255,107,0,0.08);
-    box-shadow: 0 0 0 3px rgba(255,107,0,0.15);
-  }
+label {
+  display: block;
 
-  .skill-section label {
-    margin-bottom: 14px;
-  }
+  margin-bottom: 8px;
 
-  .skill-options {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
+  color: var(--orange);
 
-  .skill-option {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: rgba(255,255,255,0.05);
-    border: 1.5px solid rgba(255,255,255,0.1);
-    border-radius: 14px;
-    padding: 12px 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
+  font-size: 12px;
+  font-weight: 800;
 
-  .skill-option:hover {
-    background: rgba(255,107,0,0.1);
-    border-color: rgba(255,107,0,0.4);
-    transform: translateX(4px);
-  }
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
 
-  .skill-option input[type="radio"] {
-    display: none;
-  }
+input,
+textarea {
+  width: 100%;
 
-  .skill-option.selected {
-    background: rgba(255,107,0,0.15);
-    border-color: var(--orange);
-    box-shadow: 0 0 15px rgba(255,107,0,0.2);
-  }
+  border: 1.5px solid rgba(255,255,255,0.15);
+  border-radius: 14px;
 
-  .skill-dots {
-    font-size: 14px;
-    min-width: 80px;
-    letter-spacing: 2px;
-  }
+  background: rgba(255,255,255,0.06);
 
-  .skill-label {
-    font-size: 13px;
-    font-weight: 700;
-    color: rgba(255,255,255,0.85);
-  }
+  color: white;
 
-  .skill-sub {
-    font-size: 11px;
-    color: rgba(255,255,255,0.4);
-    font-weight: 600;
-    margin-left: auto;
-    text-align: right;
-  }
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
 
-  .submit-btn {
-    width: 100%;
-    margin-top: 28px;
-    padding: 18px;
-    background: linear-gradient(135deg, var(--orange), var(--pink));
-    border: none;
-    border-radius: 16px;
-    font-family: 'Pacifico', cursive;
-    font-size: 18px;
-    color: var(--white);
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 8px 30px rgba(255, 29, 142, 0.35);
-  }
+  padding: 14px 18px;
 
-  .submit-btn:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 14px 40px rgba(255,29,142,0.45);
-  }
+  outline: none;
 
-  .footer-note {
-    text-align: center;
-    font-size: 12px;
-    color: rgba(255,255,255,0.3);
-    margin-top: 20px;
-    font-weight: 600;
-  }
+  transition:
+    border-color 0.25s,
+    background 0.25s,
+    box-shadow 0.25s;
+}
 
-  .footer-note span {
-    color: var(--teal);
-  }
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
 
-  .divider {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 28px 0;
-  }
+input::placeholder,
+textarea::placeholder {
+  color: rgba(255,255,255,0.3);
+}
 
-  .divider-line {
-    flex: 1;
-    height: 1px;
-    background: rgba(255,255,255,0.1);
-  }
+input:focus,
+textarea:focus {
+  border-color: var(--orange);
 
-  .divider-text {
-    font-size: 11px;
-    font-weight: 800;
-    color: rgba(255,255,255,0.25);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
+  background: rgba(255,107,0,0.08);
 
-  .success-msg {
-    display: none;
-    text-align: center;
-    padding: 24px;
-  }
+  box-shadow:
+    0 0 0 3px rgba(255,107,0,0.15);
+}
 
-  .success-msg .big-emoji {
-    font-size: 64px;
-    display: block;
-    margin-bottom: 16px;
-  }
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 
-  .success-msg h2 {
-    font-family: 'Pacifico', cursive;
-    font-size: 28px;
-    color: var(--yellow);
-    margin-bottom: 8px;
-  }
+  margin: 28px 0;
+}
 
-  .success-msg p {
-    color: rgba(255,255,255,0.6);
-    font-size: 15px;
-    font-weight: 600;
-  }
+.divider-line {
+  flex: 1;
+  height: 1px;
+
+  background: rgba(255,255,255,0.1);
+}
+
+.divider-text {
+  color: rgba(255,255,255,0.25);
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.skill-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skill-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 12px 16px;
+
+  border-radius: 14px;
+
+  border: 1.5px solid rgba(255,255,255,0.1);
+
+  background: rgba(255,255,255,0.05);
+
+  cursor: pointer;
+
+  transition: all 0.2s;
+}
+
+.skill-option:hover {
+  transform: translateX(4px);
+
+  background: rgba(255,107,0,0.1);
+
+  border-color: rgba(255,107,0,0.35);
+}
+
+.skill-option.selected {
+  background: rgba(255,107,0,0.16);
+
+  border-color: var(--orange);
+
+  box-shadow:
+    0 0 15px rgba(255,107,0,0.2);
+}
+
+.skill-option input {
+  display: none;
+}
+
+.skill-dots {
+  min-width: 90px;
+}
+
+.skill-label {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.skill-sub {
+  margin-left: auto;
+
+  color: rgba(255,255,255,0.45);
+
+  font-size: 11px;
+  font-weight: 700;
+
+  text-align: right;
+}
+
+.submit-btn {
+  width: 100%;
+
+  margin-top: 30px;
+
+  padding: 18px;
+
+  border: none;
+  border-radius: 16px;
+
+  cursor: pointer;
+
+  color: white;
+
+  font-family: 'Pacifico', cursive;
+  font-size: 20px;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--orange),
+      var(--pink)
+    );
+
+  box-shadow:
+    0 8px 30px rgba(255,29,142,0.35);
+
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.submit-btn:hover {
+  transform: translateY(-3px) scale(1.02);
+
+  box-shadow:
+    0 14px 40px rgba(255,29,142,0.45);
+}
+
+.footer-note {
+  margin-top: 20px;
+
+  text-align: center;
+
+  color: rgba(255,255,255,0.3);
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.footer-note span {
+  color: var(--teal);
+}
+
+.success-msg {
+  display: none;
+
+  text-align: center;
+
+  padding: 24px;
+}
+
+.success-msg .big-emoji {
+  display: block;
+
+  margin-bottom: 16px;
+
+  font-size: 64px;
+}
+
+.success-msg h2 {
+  margin-bottom: 8px;
+
+  color: var(--yellow);
+
+  font-size: 30px;
+
+  font-family: 'Pacifico', cursive;
+}
+
+.success-msg p {
+  color: rgba(255,255,255,0.6);
+
+  font-size: 15px;
+  font-weight: 700;
+}
+
 </style>
 </head>
 
@@ -381,7 +487,9 @@ html_code = r"""
       Music Of The Spheres
     </p>
 
-    <h1>Learn Guitar!</h1>
+    <h1>
+      Learn Guitar!
+    </h1>
 
     <p class="tagline">
       School of Improvisation ✦ Enquire Below
@@ -393,6 +501,7 @@ html_code = r"""
 
         <div class="form-group">
           <label>Your Name</label>
+
           <input
             type="text"
             id="name"
@@ -403,6 +512,7 @@ html_code = r"""
 
         <div class="form-group">
           <label>Email Address</label>
+
           <input
             type="email"
             id="email"
@@ -413,6 +523,7 @@ html_code = r"""
 
         <div class="form-group">
           <label>Phone Number</label>
+
           <input
             type="tel"
             id="phone"
@@ -423,64 +534,95 @@ html_code = r"""
 
         <div class="form-group">
           <label>Notes</label>
-          <input
-            type="password"
-            id="password"
+
+          <textarea
+            id="notes-input"
             placeholder="Anything you would like me to know?"
-            required
-          >
+          ></textarea>
         </div>
 
         <div class="divider">
           <div class="divider-line"></div>
+
           <div class="divider-text">
             Your Guitar Level
           </div>
+
           <div class="divider-line"></div>
         </div>
 
-        <div class="form-group skill-section">
+        <div class="skill-options">
 
-          <label>How do you shred?</label>
+          <label class="skill-option">
+            <input type="radio" name="skill" value="beginner">
 
-          <div class="skill-options">
+            <span class="skill-dots">🎸</span>
 
-            <label class="skill-option">
-              <input type="radio" name="skill" value="beginner">
-              <span class="skill-dots">🎸</span>
-              <span class="skill-label">Total Beginner</span>
-              <span class="skill-sub">Never played!</span>
-            </label>
+            <span class="skill-label">
+              Total Beginner
+            </span>
 
-            <label class="skill-option">
-              <input type="radio" name="skill" value="novice">
-              <span class="skill-dots">🎸🎸</span>
-              <span class="skill-label">Know a Few Chords</span>
-              <span class="skill-sub">G, C & D squad</span>
-            </label>
+            <span class="skill-sub">
+              Never played!
+            </span>
+          </label>
 
-            <label class="skill-option">
-              <input type="radio" name="skill" value="intermediate">
-              <span class="skill-dots">🎸🎸🎸</span>
-              <span class="skill-label">Intermediate Jammer</span>
-              <span class="skill-sub">Campfire hero</span>
-            </label>
+          <label class="skill-option">
+            <input type="radio" name="skill" value="novice">
 
-            <label class="skill-option">
-              <input type="radio" name="skill" value="advanced">
-              <span class="skill-dots">🎸🎸🎸🎸</span>
-              <span class="skill-label">Advanced Player</span>
-              <span class="skill-sub">Solos & scales</span>
-            </label>
+            <span class="skill-dots">🎸🎸</span>
 
-            <label class="skill-option">
-              <input type="radio" name="skill" value="god">
-              <span class="skill-dots">🎸🎸🎸🎸🎸</span>
-              <span class="skill-label">Shredding God</span>
-              <span class="skill-sub">Why are you here?!</span>
-            </label>
+            <span class="skill-label">
+              Know a Few Chords
+            </span>
 
-          </div>
+            <span class="skill-sub">
+              G, C & D squad
+            </span>
+          </label>
+
+          <label class="skill-option">
+            <input type="radio" name="skill" value="intermediate">
+
+            <span class="skill-dots">🎸🎸🎸</span>
+
+            <span class="skill-label">
+              Intermediate Jammer
+            </span>
+
+            <span class="skill-sub">
+              Campfire hero
+            </span>
+          </label>
+
+          <label class="skill-option">
+            <input type="radio" name="skill" value="advanced">
+
+            <span class="skill-dots">🎸🎸🎸🎸</span>
+
+            <span class="skill-label">
+              Advanced Player
+            </span>
+
+            <span class="skill-sub">
+              Solos & scales
+            </span>
+          </label>
+
+          <label class="skill-option">
+            <input type="radio" name="skill" value="god">
+
+            <span class="skill-dots">🎸🎸🎸🎸🎸</span>
+
+            <span class="skill-label">
+              Shredding God
+            </span>
+
+            <span class="skill-sub">
+              Why are you here?!
+            </span>
+          </label>
+
         </div>
 
         <button type="submit" class="submit-btn">
@@ -494,16 +636,23 @@ html_code = r"""
         </p>
 
       </form>
+
     </div>
 
     <div class="success-msg" id="success-msg">
+
       <span class="big-emoji">🎸</span>
-      <h2>You're a Rock Star!</h2>
+
+      <h2>
+        You're a Rock Star!
+      </h2>
+
       <p>
         Your enquiry is on its way to Music Of The Spheres.
         <br>
         We'll be in touch super soon!
       </p>
+
     </div>
 
   </div>
@@ -515,6 +664,7 @@ html_code = r"""
 const starsEl = document.getElementById('stars');
 
 for (let i = 0; i < 80; i++) {
+
   const s = document.createElement('div');
 
   s.className = 'star';
@@ -534,6 +684,7 @@ for (let i = 0; i < 80; i++) {
 }
 
 const noteSymbols = ['♪', '♫', '♩', '♬', '♭', '♮'];
+
 const notesEl = document.getElementById('notes');
 
 for (let i = 0; i < 12; i++) {
@@ -580,9 +731,17 @@ document
 
   e.preventDefault();
 
-  const name  = document.getElementById('name').value;
-  const email = document.getElementById('email').value;
-  const phone = document.getElementById('phone').value;
+  const name =
+    document.getElementById('name').value;
+
+  const email =
+    document.getElementById('email').value;
+
+  const phone =
+    document.getElementById('phone').value;
+
+  const notes =
+    document.getElementById('notes-input').value;
 
   const skill =
     document.querySelector(
@@ -607,14 +766,19 @@ document
   );
 
   const body = encodeURIComponent(
-    `Hello Music Of The Spheres!\\n\\n` +
-    `I'd love to enquire about guitar lessons.\\n\\n` +
-    `Name: ${name}\\n` +
-    `Email: ${email}\\n` +
-    `Phone: ${phone}\\n` +
-    `Guitar Skill Level: ${skillText}\\n\\n` +
-    `Please get in touch at your earliest convenience!\\n\\n` +
-    `Best wishes,\\n${name}`
+    `Hello Music Of The Spheres!\n\n` +
+
+    `I'd love to enquire about guitar lessons.\n\n` +
+
+    `Name: ${name}\n` +
+    `Email: ${email}\n` +
+    `Phone: ${phone}\n` +
+    `Guitar Skill Level: ${skillText}\n` +
+    `Notes: ${notes}\n\n` +
+
+    `Please get in touch at your earliest convenience!\n\n` +
+
+    `Best wishes,\n${name}`
   );
 
   window.location.href =
@@ -624,10 +788,15 @@ document
 
   document.getElementById('success-msg').style.display = 'block';
 });
+
 </script>
 
 </body>
 </html>
 """
 
-components.html(html_code, height=1200, scrolling=False)
+components.html(
+    html_code,
+    height=1400,
+    scrolling=False
+)
