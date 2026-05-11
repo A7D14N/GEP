@@ -32,6 +32,7 @@ html, body {
   width: 100%;
   min-height: 100%;
   overflow-x: hidden;
+  overflow-y: auto;
   background: #0d0020;
   font-family: 'Nunito', sans-serif;
   color: white;
@@ -393,6 +394,8 @@ textarea::placeholder {
   .scene {
     padding: 14px 12px 40px;
     align-items: flex-start;
+    height: auto;
+    min-height: auto;
   }
 
   .card {
