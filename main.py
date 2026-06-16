@@ -1,262 +1,179 @@
-import streamlit as st
-import streamlit.components.v1 as components
-
-st.set_page_config(
-    page_title="Learn Guitar — Music Of The Spheres",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
-
-# REMOVE STREAMLIT PADDING / BORDERS / SPACING
-st.markdown("""
-<style>
-
-html, body, [class*="css"]  {
-    margin: 0;
-    padding: 0;
-}
-
-[data-testid="stAppViewContainer"] {
-    background: #0d0020;
-}
-
-[data-testid="stHeader"] {
-    display: none;
-}
-
-.block-container {
-    padding: 0rem !important;
-    max-width: 100% !important;
-}
-
-iframe {
-    border: none !important;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-html_code = r"""
 <!DOCTYPE html>
 <html lang="en">
+<!--
+    Learn Guitar — Music Of The Spheres
+    Single-file enquiry form, mobile-first.
 
+    SETUP
+    -----
+    1. Find "your-email@example.com" (occurs in the <form action="..."> below
+       AND in the FORM_ENDPOINT constant in the <script> below) and replace it
+       with Mizarolli's real email. The first time the form is submitted,
+       formsubmit.co will email a confirmation link — click it once to activate.
+       (formsubmit.co is a free form-to-email service, no signup required.)
+    2. The redirect target (https://www.mizarolli.net/) and the thank-you copy
+       are at the top of the <script> block — change them there if needed.
+
+    STREAMLIT KEEP-ALIVE
+    --------------------
+    The script at the bottom pings /_stcore/health every 25s while the page
+    is open in a Streamlit iframe. This keeps the WebSocket warm during a
+    session. It will NOT stop the Streamlit Community Cloud free tier from
+    sleeping when nobody is connected — for that, point UptimeRobot (free)
+    at https://<your-app>.streamlit.app/ on a 5-minute interval.
+-->
 <head>
-
 <meta charset="UTF-8">
-
-<meta
-name="viewport"
-content="width=device-width, initial-scale=1.0"
-/>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
+<meta name="theme-color" content="#0d0020">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
+<title>Learn Guitar — Music Of The Spheres</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-
 <style>
-
-* {
+*, *::before, *::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
 :root {
-    --deep: #0d0020;
+    --deep:   #0d0020;
     --orange: #ff6b00;
-    --pink: #ff1d8e;
+    --pink:   #ff1d8e;
     --yellow: #ffe600;
-    --white: #ffffff;
+    --safe-top:    env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left:   env(safe-area-inset-left, 0px);
+    --safe-right:  env(safe-area-inset-right, 0px);
 }
 
-html,
+html {
+    width: 100%;
+    -webkit-text-size-adjust: 100%;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+}
+
 body {
     width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh; /* iOS Safari fix: real viewport height */
     background: var(--deep);
-    font-family: 'Nunito', sans-serif;
+    font-family: 'Nunito', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     color: white;
-}
-
-body {
+    overflow-x: hidden;
     position: relative;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior-y: contain;     /* kill rubber-band over the page */
+    touch-action: manipulation;          /* disable double-tap zoom */
+    padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
 }
 
-.scene {
-    position: relative;
-    width: 100%;
-    padding: 20px 14px 50px;
-    display: flex;
-    justify-content: center;
-}
-
-.stars,
-.notes-float {
+.stars {
     position: fixed;
     inset: 0;
     pointer-events: none;
     overflow: hidden;
+    z-index: 0;
 }
 
 .star {
     position: absolute;
     background: white;
     border-radius: 50%;
-    animation:
-        twinkle var(--dur)
-        ease-in-out
-        infinite
-        var(--delay);
-}
-
-.note {
-    position: absolute;
-    color: var(--yellow);
-    opacity: 0;
-    animation:
-        floatUp var(--dur)
-        ease-in-out
-        infinite
-        var(--delay);
+    animation: twinkle var(--dur) ease-in-out infinite var(--delay);
+    will-change: opacity, transform;
 }
 
 @keyframes twinkle {
-
-    0%,100% {
-        opacity: 0.1;
-        transform: scale(1);
-    }
-
-    50% {
-        opacity: 0.9;
-        transform: scale(1.5);
-    }
+    0%, 100% { opacity: 0.1; transform: scale(1); }
+    50%      { opacity: 0.9; transform: scale(1.5); }
 }
 
-@keyframes floatUp {
-
-    0% {
-        opacity: 0;
-        transform: translateY(0);
-    }
-
-    20% {
-        opacity: 0.7;
-    }
-
-    100% {
-        opacity: 0;
-        transform: translateY(-90vh) rotate(25deg);
-    }
+.scene {
+    position: relative;
+    width: 100%;
+    min-height: calc(100vh - var(--safe-top) - var(--safe-bottom));
+    min-height: calc(100dvh - var(--safe-top) - var(--safe-bottom));
+    padding: 20px 14px 50px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;     /* keep top of card visible after address-bar collapse */
+    z-index: 1;
 }
 
 .card {
-
     position: relative;
-    z-index: 10;
-
     width: 100%;
     max-width: 560px;
-
-    margin: 20px auto;
-
-    background: rgba(26,5,51,0.88);
-
+    background: rgba(26, 5, 51, 0.88);
+    -webkit-backdrop-filter: blur(18px);
     backdrop-filter: blur(18px);
-
-    border: 1px solid rgba(255,107,0,0.25);
-
+    border: 1px solid rgba(255, 107, 0, 0.25);
     border-radius: 28px;
-
     padding: 42px 32px;
-
     box-shadow:
-        0 0 40px rgba(255,29,142,0.12),
-        0 0 90px rgba(255,107,0,0.08);
+        0 0 40px rgba(255, 29, 142, 0.12),
+        0 0 90px rgba(255, 107, 0, 0.08);
+    animation: cardIn 0.6s ease-out;
+}
+
+@keyframes cardIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 .logo-ring {
-
     width: 74px;
     height: 74px;
-
     margin: 0 auto 20px;
-
     border-radius: 50%;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     font-size: 34px;
-
-    background:
-        linear-gradient(
-            135deg,
-            var(--orange),
-            var(--pink)
-        );
-
-    animation:
-        pulse 2.5s ease-in-out infinite;
+    background: linear-gradient(135deg, var(--orange), var(--pink));
+    box-shadow: 0 8px 24px rgba(255, 29, 142, 0.4);
+    animation: pulse 3s ease-in-out infinite;
 }
 
 @keyframes pulse {
-
-    0%,100% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.06);
-    }
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.05); }
 }
 
 .school-name {
-
     text-align: center;
-
     color: var(--orange);
-
     font-size: 12px;
     font-weight: 800;
-
     letter-spacing: 0.12em;
-
     text-transform: uppercase;
-
     margin-bottom: 8px;
 }
 
 h1 {
-
     font-family: 'Pacifico', cursive;
-
     font-size: 38px;
-
     text-align: center;
-
     line-height: 1.15;
-
     margin-bottom: 12px;
-
-    background:
-        linear-gradient(
-            135deg,
-            white,
-            var(--yellow),
-            var(--orange)
-        );
-
+    background: linear-gradient(135deg, white, var(--yellow), var(--orange));
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .tagline {
-
     text-align: center;
-
-    color: rgba(255,255,255,0.6);
-
+    color: rgba(255, 255, 255, 0.6);
     font-size: 14px;
-
     margin-bottom: 34px;
 }
 
@@ -265,41 +182,39 @@ h1 {
 }
 
 label {
-
     display: block;
-
     margin-bottom: 8px;
-
     color: var(--orange);
-
     font-size: 12px;
     font-weight: 800;
-
     text-transform: uppercase;
-
     letter-spacing: 0.1em;
 }
 
-input,
-textarea {
-
+input, textarea {
     width: 100%;
-
-    border: 1px solid rgba(255,255,255,0.12);
-
-    background: rgba(255,255,255,0.06);
-
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
     border-radius: 14px;
-
     padding: 15px 16px;
-
     color: white;
-
-    font-size: 16px;
-
+    font-size: 16px;     /* CRITICAL on iOS: anything < 16px triggers zoom on focus */
+    font-family: inherit;
     outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    touch-action: manipulation;
+}
 
-    transition: 0.2s;
+input:focus, textarea:focus {
+    border-color: var(--orange);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.15);
+}
+
+input::placeholder, textarea::placeholder {
+    color: rgba(255, 255, 255, 0.35);
 }
 
 textarea {
@@ -307,656 +222,457 @@ textarea {
     resize: vertical;
 }
 
-input:focus,
-textarea:focus {
-
-    border-color: var(--orange);
-
-    background: rgba(255,107,0,0.08);
-
-    box-shadow:
-        0 0 0 3px rgba(255,107,0,0.15);
-}
-
-input::placeholder,
-textarea::placeholder {
-    color: rgba(255,255,255,0.3);
-}
-
-.divider {
-
-    display: flex;
-    align-items: center;
-
-    gap: 12px;
-
-    margin: 28px 0;
-}
-
-.divider-line {
-
-    flex: 1;
-
-    height: 1px;
-
-    background: rgba(255,255,255,0.1);
-}
-
-.divider-text {
-
-    font-size: 11px;
-
-    color: rgba(255,255,255,0.3);
-
-    font-weight: 800;
-
-    letter-spacing: 0.1em;
-
-    text-transform: uppercase;
-}
-
 .skill-options {
-
     display: flex;
     flex-direction: column;
-
     gap: 10px;
+    margin-top: 20px;
 }
 
 .skill-option {
-
     display: flex;
     align-items: center;
-
     gap: 12px;
-
     padding: 14px 16px;
-
+    min-height: 52px;        /* 44px+ touch target */
     border-radius: 14px;
-
-    border: 1px solid rgba(255,255,255,0.08);
-
-    background: rgba(255,255,255,0.05);
-
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.05);
     cursor: pointer;
-
-    transition: 0.2s;
+    transition: transform 0.15s, border-color 0.2s, background 0.2s;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+    position: relative;
 }
 
-.skill-option:hover {
-
-    border-color: rgba(255,107,0,0.4);
-
-    background: rgba(255,107,0,0.08);
-}
+.skill-option:active { transform: scale(0.98); }
 
 .skill-option.selected {
-
     border-color: var(--orange);
-
-    background: rgba(255,107,0,0.14);
+    background: rgba(255, 107, 0, 0.14);
+    box-shadow: inset 0 0 0 1px var(--orange);
 }
 
 .skill-option input {
-    display: none;
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 1px;
+    height: 1px;
+    margin: 0;
 }
 
-.skill-dots {
-    min-width: 80px;
-}
-
-.skill-label {
-
-    font-size: 14px;
-
-    font-weight: 700;
-}
-
-.skill-sub {
-
-    margin-left: auto;
-
-    font-size: 11px;
-
-    color: rgba(255,255,255,0.45);
-}
+.skill-option span { flex: 1; }
 
 .submit-btn {
-
     width: 100%;
-
     margin-top: 30px;
-
     border: none;
-
     border-radius: 16px;
-
     padding: 18px;
-
     cursor: pointer;
-
     font-size: 18px;
-
     font-family: 'Pacifico', cursive;
-
     color: white;
-
-    background:
-        linear-gradient(
-            135deg,
-            var(--orange),
-            var(--pink)
-        );
-
-    box-shadow:
-        0 10px 30px rgba(255,29,142,0.35);
-
-    transition: 0.2s;
+    background: linear-gradient(135deg, var(--orange), var(--pink));
+    -webkit-appearance: none;
+    appearance: none;
+    min-height: 56px;
+    touch-action: manipulation;
+    transition: transform 0.15s, opacity 0.2s, box-shadow 0.2s;
+    box-shadow: 0 8px 24px rgba(255, 29, 142, 0.3);
+    position: relative;
 }
 
-.submit-btn:hover {
-    transform: translateY(-2px);
+.submit-btn:active:not(:disabled) { transform: scale(0.98); }
+.submit-btn:disabled              { opacity: 0.7; cursor: not-allowed; }
+
+.submit-btn.loading::after {
+    content: '';
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    width: 20px;
+    height: 20px;
+    margin-top: -10px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
 }
+
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .footer-note {
-
     margin-top: 20px;
-
     text-align: center;
-
     font-size: 12px;
-
-    color: rgba(255,255,255,0.35);
+    color: rgba(255, 255, 255, 0.35);
 }
 
-.success-msg {
+/* Thank-you overlay */
+.thank-you {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(13, 0, 32, 0.95);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: max(24px, var(--safe-top)) max(24px, var(--safe-right))
+            max(24px, var(--safe-bottom)) max(24px, var(--safe-left));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s;
+}
 
-    display: none;
+.thank-you.show {
+    opacity: 1;
+    pointer-events: auto;
+}
 
+.thank-you-content {
     text-align: center;
-
-    padding: 24px 0;
+    max-width: 400px;
+    width: 100%;
+    animation: popIn 0.5s ease-out;
 }
 
-.success-msg h2 {
+@keyframes popIn {
+    0%   { transform: scale(0.5); opacity: 0; }
+    60%  { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1);    opacity: 1; }
+}
 
-    margin: 16px 0 10px;
+.thank-you-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+    display: inline-block;
+    animation: bounce 1.5s ease-in-out infinite;
+}
 
-    color: var(--yellow);
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-12px); }
+}
 
+.thank-you h2 {
     font-family: 'Pacifico', cursive;
+    font-size: 32px;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, white, var(--yellow), var(--orange));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.2;
 }
 
-.success-msg p {
-    color: rgba(255,255,255,0.6);
+.thank-you p {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 12px;
 }
 
-.big-emoji {
-    font-size: 62px;
+.thank-you p strong { color: white; font-weight: 800; }
+
+.redirect-note {
+    color: var(--orange) !important;
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 24px !important;
 }
 
+.progress-bar {
+    width: 100%;
+    max-width: 240px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    margin: 20px auto 0;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--orange), var(--pink));
+    border-radius: 2px;
+    transform-origin: left;
+    animation: progress 2.5s linear forwards;
+}
+
+@keyframes progress {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+}
+
+/* Breakpoints */
 @media (max-width: 640px) {
-
-    .scene {
-        padding: 10px 8px 40px;
-    }
-
-    .card {
-
-        width: 100%;
-
-        padding: 26px 18px;
-
-        border-radius: 22px;
-    }
-
-    h1 {
-        font-size: 30px;
-    }
-
-    .skill-option {
-
-        flex-direction: column;
-
-        align-items: flex-start;
-    }
-
-    .skill-sub {
-        margin-left: 0;
-    }
-
-    .submit-btn {
-        font-size: 16px;
-    }
+    .card         { padding: 26px 18px; border-radius: 22px; }
+    h1            { font-size: 30px; }
+    .scene        { padding: 14px 12px 40px; }
+    .logo-ring    { width: 64px; height: 64px; font-size: 28px; }
+    .skill-option { padding: 12px 14px; min-height: 48px; }
+    .submit-btn   { font-size: 17px; padding: 16px; }
+    .thank-you h2   { font-size: 26px; }
+    .thank-you-icon { font-size: 64px; }
 }
 
+@media (max-width: 380px) {
+    .card         { padding: 22px 14px; }
+    h1            { font-size: 26px; }
+    .skill-option { font-size: 14px; }
+    .tagline      { font-size: 13px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
 </style>
 </head>
-
 <body>
 
 <div class="stars" id="stars"></div>
 
-<div class="notes-float" id="notes"></div>
-
 <div class="scene">
+    <div class="card">
+        <div class="logo-ring" aria-hidden="true">🎸</div>
+        <p class="school-name">Music Of The Spheres</p>
+        <h1>Learn Guitar!</h1>
+        <p class="tagline">School of Improvisation ✦ Enquire Below</p>
 
-<div class="card">
+        <form id="guitar-form"
+              action="https://formsubmit.co/your-email@example.com"
+              method="POST"
+              autocomplete="on">
 
-<div class="logo-ring">
-🎸
+            <!-- Fallback redirect (used only if JS is disabled) -->
+            <input type="hidden" name="_next"    value="https://www.mizarolli.net/">
+            <input type="hidden" name="_subject" value="🎸 New Guitar Lesson Enquiry!">
+            <input type="hidden" name="_template" value="table">
+            <input type="hidden" name="_captcha" value="false">
+
+            <div class="form-group">
+                <label for="name">Your Name</label>
+                <input type="text" id="name" name="name"
+                       placeholder="Enter your name" required
+                       autocomplete="name" autocapitalize="words">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email"
+                       placeholder="yourname@example.com" required
+                       autocomplete="email" inputmode="email"
+                       autocapitalize="none" spellcheck="false">
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone"
+                       placeholder="+44 7000 000000" required
+                       autocomplete="tel" inputmode="tel">
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Notes</label>
+                <textarea id="notes" name="notes"
+                          placeholder="Anything you'd like me to know?"
+                          autocomplete="off"></textarea>
+            </div>
+
+            <div class="skill-options" role="radiogroup" aria-label="Skill level">
+                <label class="skill-option">
+                    <input type="radio" name="skill" value="Total Beginner" required>
+                    <span>🎸 Total Beginner</span>
+                </label>
+                <label class="skill-option">
+                    <input type="radio" name="skill" value="Know a Few Chords">
+                    <span>🎸🎸 Know a Few Chords</span>
+                </label>
+                <label class="skill-option">
+                    <input type="radio" name="skill" value="Intermediate Jammer">
+                    <span>🎸🎸🎸 Intermediate Jammer</span>
+                </label>
+                <label class="skill-option">
+                    <input type="radio" name="skill" value="Advanced Player">
+                    <span>🎸🎸🎸🎸 Advanced Player</span>
+                </label>
+                <label class="skill-option">
+                    <input type="radio" name="skill" value="Shredding God">
+                    <span>🎸🎸🎸🎸🎸 Shredding God</span>
+                </label>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submit-btn">
+                🎵 Send My Enquiry!
+            </button>
+
+            <p class="footer-note">Music Of The Spheres ✦ We'll reply ASAP</p>
+        </form>
+    </div>
 </div>
 
-<p class="school-name">
-Music Of The Spheres
-</p>
-
-<h1>
-Learn Guitar!
-</h1>
-
-<p class="tagline">
-School of Improvisation ✦ Enquire Below
-</p>
-
-<div id="form-content">
-
-<form id="guitar-form">
-
-<div class="form-group">
-
-<label>
-Your Name
-</label>
-
-<input
-type="text"
-id="name"
-placeholder="Enter your name"
-required
->
-
-</div>
-
-<div class="form-group">
-
-<label>
-Email Address
-</label>
-
-<input
-type="email"
-id="email"
-placeholder="yourname@example.com"
-required
->
-
-</div>
-
-<div class="form-group">
-
-<label>
-Phone Number
-</label>
-
-<input
-type="tel"
-id="phone"
-placeholder="+44 7000 000000"
-required
->
-
-</div>
-
-<div class="form-group">
-
-<label>
-Notes
-</label>
-
-<textarea
-id="notesInput"
-placeholder="Anything you'd like me to know?"
-></textarea>
-
-</div>
-
-<div class="divider">
-
-<div class="divider-line"></div>
-
-<div class="divider-text">
-Your Guitar Level
-</div>
-
-<div class="divider-line"></div>
-
-</div>
-
-<div class="skill-options">
-
-<label class="skill-option">
-
-<input
-type="radio"
-name="skill"
-value="beginner"
->
-
-<span class="skill-dots">
-🎸
-</span>
-
-<span class="skill-label">
-Total Beginner
-</span>
-
-<span class="skill-sub">
-Never played!
-</span>
-
-</label>
-
-<label class="skill-option">
-
-<input
-type="radio"
-name="skill"
-value="novice"
->
-
-<span class="skill-dots">
-🎸🎸
-</span>
-
-<span class="skill-label">
-Know a Few Chords
-</span>
-
-<span class="skill-sub">
-G, C & D squad
-</span>
-
-</label>
-
-<label class="skill-option">
-
-<input
-type="radio"
-name="skill"
-value="intermediate"
->
-
-<span class="skill-dots">
-🎸🎸🎸
-</span>
-
-<span class="skill-label">
-Intermediate Jammer
-</span>
-
-<span class="skill-sub">
-Campfire hero
-</span>
-
-</label>
-
-<label class="skill-option">
-
-<input
-type="radio"
-name="skill"
-value="advanced"
->
-
-<span class="skill-dots">
-🎸🎸🎸🎸
-</span>
-
-<span class="skill-label">
-Advanced Player
-</span>
-
-<span class="skill-sub">
-Solos & scales
-</span>
-
-</label>
-
-<label class="skill-option">
-
-<input
-type="radio"
-name="skill"
-value="god"
->
-
-<span class="skill-dots">
-🎸🎸🎸🎸🎸
-</span>
-
-<span class="skill-label">
-Shredding God
-</span>
-
-<span class="skill-sub">
-Why are you here?!
-</span>
-
-</label>
-
-</div>
-
-<button
-type="submit"
-class="submit-btn"
->
-🎵 Send My Enquiry!
-</button>
-
-<p class="footer-note">
-Music Of The Spheres ✦ We'll reply ASAP
-</p>
-
-</form>
-</div>
-
-<div
-class="success-msg"
-id="success-msg"
->
-
-<div class="big-emoji">
-🎸
-</div>
-
-<h2>
-You're a Rock Star!
-</h2>
-
-<p>
-Your enquiry has been sent.
-<br>
-We'll be in touch soon.
-</p>
-
-</div>
-
-</div>
+<!-- Thank-you overlay (shown after submission) -->
+<div class="thank-you" id="thank-you" role="alertdialog"
+     aria-live="assertive" aria-labelledby="thank-you-title">
+    <div class="thank-you-content">
+        <div class="thank-you-icon" aria-hidden="true">🎉</div>
+        <h2 id="thank-you-title">Thank You Very Much!</h2>
+        <p><strong>Mizarolli will contact you</strong> as soon as possible.</p>
+        <p>Get ready to start your guitar journey! 🎸</p>
+        <p class="redirect-note">Redirecting you to mizarolli.net…</p>
+        <div class="progress-bar" aria-hidden="true">
+            <div class="progress-fill"></div>
+        </div>
+    </div>
 </div>
 
 <script>
+(function () {
+    'use strict';
 
-const starsEl =
-document.getElementById('stars');
+    /* ============================================================
+       CONFIGURATION  ← change these two values
+       ============================================================ */
+    // Replace BOTH the email in the <form action="..."> above AND
+    // this FORM_ENDPOINT with Mizarolli's real email. First time
+    // someone submits, formsubmit.co sends a confirmation link —
+    // click it once to activate the address.
+    var FORM_ENDPOINT     = 'https://formsubmit.co/ajax/your-email@example.com';
+    var REDIRECT_URL      = 'https://www.mizarolli.net/';
+    var REDIRECT_DELAY_MS = 2800;
+    /* ============================================================ */
 
-for (let i = 0; i < 80; i++) {
+    /* ---------- Twinkling stars background ---------- */
+    var starsEl     = document.getElementById('stars');
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var STAR_COUNT   = reduceMotion ? 25 : 80;
 
-    const s =
-    document.createElement('div');
+    for (var i = 0; i < STAR_COUNT; i++) {
+        var s    = document.createElement('div');
+        s.className = 'star';
+        var size = Math.random() * 3 + 1;
+        s.style.cssText =
+            'width:'    + size + 'px;' +
+            'height:'   + size + 'px;' +
+            'left:'     + (Math.random() * 100) + '%;' +
+            'top:'      + (Math.random() * 100) + '%;' +
+            '--dur:'    + (2 + Math.random() * 4) + 's;' +
+            '--delay:'  + (Math.random() * 5)     + 's;';
+        starsEl.appendChild(s);
+    }
 
-    s.className = 'star';
-
-    const size =
-    Math.random() * 3 + 1;
-
-    s.style.cssText = `
-        width:${size}px;
-        height:${size}px;
-        left:${Math.random()*100}%;
-        top:${Math.random()*100}%;
-        --dur:${2+Math.random()*4}s;
-        --delay:${Math.random()*5}s;
-    `;
-
-    starsEl.appendChild(s);
-}
-
-const notesEl =
-document.getElementById('notes');
-
-const noteSymbols =
-['♪','♫','♩','♬'];
-
-for (let i = 0; i < 12; i++) {
-
-    const n =
-    document.createElement('div');
-
-    n.className = 'note';
-
-    n.textContent =
-    noteSymbols[
-        Math.floor(
-            Math.random()
-            * noteSymbols.length
-        )
-    ];
-
-    n.style.cssText = `
-        left:${Math.random()*100}%;
-        top:${70+Math.random()*30}%;
-        font-size:${18+Math.random()*18}px;
-        --dur:${6+Math.random()*8}s;
-        --delay:${Math.random()*8}s;
-    `;
-
-    notesEl.appendChild(n);
-}
-
-document
-.querySelectorAll('.skill-option')
-.forEach(opt => {
-
-    opt.addEventListener('click', () => {
-
-        document
-        .querySelectorAll('.skill-option')
-        .forEach(o =>
-            o.classList.remove('selected')
-        );
-
-        opt.classList.add('selected');
-
-        opt.querySelector('input')
-        .checked = true;
+    /* ---------- Skill option tap-to-select ---------- */
+    var skillOptions = document.querySelectorAll('.skill-option');
+    skillOptions.forEach(function (opt) {
+        opt.addEventListener('click', function (e) {
+            e.preventDefault();
+            skillOptions.forEach(function (o) { o.classList.remove('selected'); });
+            opt.classList.add('selected');
+            var radio = opt.querySelector('input[type="radio"]');
+            if (radio) radio.checked = true;
+        });
     });
-});
 
-document
-.getElementById('guitar-form')
-.addEventListener('submit', function(e) {
+    /* ---------- Form submission ---------- */
+    var form     = document.getElementById('guitar-form');
+    var submitBtn = document.getElementById('submit-btn');
+    var thankYou  = document.getElementById('thank-you');
 
-    e.preventDefault();
+    form.addEventListener('submit', async function (e) {
+        // Let the browser run its native validation popups first
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+        e.preventDefault();
 
-    const name =
-    document.getElementById('name').value;
+        // Belt-and-braces: make sure a skill level was picked
+        if (!form.querySelector('input[name="skill"]:checked')) {
+            var firstOpt = skillOptions[0];
+            if (firstOpt) {
+                firstOpt.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                skillOptions.forEach(function (o) {
+                    o.style.transition = 'border-color 0.3s';
+                    o.style.borderColor = 'var(--pink)';
+                    setTimeout(function () { o.style.borderColor = ''; }, 1200);
+                });
+            }
+            return;
+        }
 
-    const email =
-    document.getElementById('email').value;
+        // Loading state on the button
+        var originalLabel = submitBtn.textContent;
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+        submitBtn.setAttribute('aria-busy', 'true');
+        submitBtn.textContent = 'Sending…';
 
-    const phone =
-    document.getElementById('phone').value;
+        // Collect + send (fire-and-forget; the overlay shows even if the
+        // network is flaky so the user is never left staring at a spinner)
+        var data = {};
+        new FormData(form).forEach(function (v, k) { data[k] = v; });
 
-    const notes =
-    document.getElementById('notesInput').value;
+        try {
+            await fetch(FORM_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept':       'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+        } catch (err) {
+            console.warn('Form submit warning:', err);
+        }
 
-    const skill =
-    document.querySelector(
-        'input[name="skill"]:checked'
-    );
+        // Show thank-you overlay and lock background scroll
+        thankYou.classList.add('show');
+        document.body.style.overflow = 'hidden';
 
-    const skillLabels = {
+        // Redirect — tries top window first (works inside Streamlit iframes),
+        // then parent, then self, then a clickable link as last resort.
+        setTimeout(function () { navigateTo(REDIRECT_URL); }, REDIRECT_DELAY_MS);
+    });
 
-        beginner:
-        'Total Beginner 🎸',
+    function navigateTo(url) {
+        try { window.top.location.replace(url); return; }    catch (e) {}
+        try { window.parent.location.replace(url); return; } catch (e) {}
+        try { window.location.replace(url); return; }         catch (e) {}
+        var a = document.createElement('a');
+        a.href = url;
+        a.textContent = 'Tap here to continue →';
+        a.style.cssText = 'display:inline-block;margin-top:20px;color:var(--orange);font-weight:800;text-decoration:none;padding:14px 22px;border:1px solid var(--orange);border-radius:12px;';
+        thankYou.querySelector('.thank-you-content').appendChild(a);
+    }
 
-        novice:
-        'Know a Few Chords 🎸🎸',
-
-        intermediate:
-        'Intermediate Jammer 🎸🎸🎸',
-
-        advanced:
-        'Advanced Player 🎸🎸🎸🎸',
-
-        god:
-        'Shredding God 🎸🎸🎸🎸🎸'
-    };
-
-    const skillText =
-    skill
-    ? skillLabels[skill.value]
-    : 'Not specified';
-
-    const subject =
-    encodeURIComponent(
-        `Guitar Lesson Enquiry — ${name}`
-    );
-
-    const body =
-    encodeURIComponent(
-
-`Hello Music Of The Spheres!
-
-I'd love to enquire about guitar lessons.
-
-Name: ${name}
-
-Email: ${email}
-
-Phone: ${phone}
-
-Skill Level: ${skillText}
-
-Notes:
-${notes}
-
-Best wishes,
-${name}`
-
-    );
-
-    window.location.href =
-`mailto:mizarolli@icloud.com?subject=${subject}&body=${body}`;
-
-    document
-    .getElementById('form-content')
-    .style.display = 'none';
-
-    document
-    .getElementById('success-msg')
-    .style.display = 'block';
-});
-
+    /* ---------- Streamlit keep-alive (best effort) ----------
+       While the page is open, ping the Streamlit health endpoint so the
+       WebSocket stays warm and the script process doesn't go idle.
+       This will NOT keep the Streamlit Community Cloud *app itself* from
+       sleeping when no one is connected — for that, set up UptimeRobot
+       (free) on https://<your-app>.streamlit.app/ at 5-min intervals. */
+    function setupStreamlitKeepAlive() {
+        try {
+            if (window.parent && window.parent !== window) {
+                setInterval(function () {
+                    fetch('/_stcore/health', { cache: 'no-store' })
+                        .catch(function () {});
+                }, 25000);
+            }
+        } catch (e) { /* cross-origin — ignore */ }
+    }
+    setupStreamlitKeepAlive();
+})();
 </script>
-
 </body>
 </html>
-"""
-
-components.html(
-    html_code,
-    height=1650,
-    scrolling=False
-)
