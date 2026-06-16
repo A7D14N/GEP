@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <!--
-    Learn Guitar — Music Of The Spheres
+    Learn Guitar - Music Of The Spheres
     Single-file enquiry form, mobile-first.
 
     SETUP
@@ -9,17 +9,17 @@
     1. Find "your-email@example.com" (occurs in the <form action="..."> below
        AND in the FORM_ENDPOINT constant in the <script> below) and replace it
        with Mizarolli's real email. The first time the form is submitted,
-       formsubmit.co will email a confirmation link — click it once to activate.
+       formsubmit.co will email a confirmation link - click it once to activate.
        (formsubmit.co is a free form-to-email service, no signup required.)
     2. The redirect target (https://www.mizarolli.net/) and the thank-you copy
-       are at the top of the <script> block — change them there if needed.
+       are at the top of the <script> block - change them there if needed.
 
     STREAMLIT KEEP-ALIVE
     --------------------
     The script at the bottom pings /_stcore/health every 25s while the page
     is open in a Streamlit iframe. This keeps the WebSocket warm during a
     session. It will NOT stop the Streamlit Community Cloud free tier from
-    sleeping when nobody is connected — for that, point UptimeRobot (free)
+    sleeping when nobody is connected - for that, point UptimeRobot (free)
     at https://<your-app>.streamlit.app/ on a 5-minute interval.
 -->
 <head>
@@ -29,7 +29,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no">
-<title>Learn Guitar — Music Of The Spheres</title>
+<title>Learn Guitar - Music Of The Spheres</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -545,7 +545,7 @@ textarea {
        ============================================================ */
     // Replace BOTH the email in the <form action="..."> above AND
     // this FORM_ENDPOINT with Mizarolli's real email. First time
-    // someone submits, formsubmit.co sends a confirmation link —
+    // someone submits, formsubmit.co sends a confirmation link -
     // click it once to activate the address.
     var FORM_ENDPOINT     = 'https://formsubmit.co/ajax/your-email@example.com';
     var REDIRECT_URL      = 'https://www.mizarolli.net/';
@@ -639,7 +639,7 @@ textarea {
         thankYou.classList.add('show');
         document.body.style.overflow = 'hidden';
 
-        // Redirect — tries top window first (works inside Streamlit iframes),
+        // Redirect - tries top window first (works inside Streamlit iframes),
         // then parent, then self, then a clickable link as last resort.
         setTimeout(function () { navigateTo(REDIRECT_URL); }, REDIRECT_DELAY_MS);
     });
@@ -659,7 +659,7 @@ textarea {
        While the page is open, ping the Streamlit health endpoint so the
        WebSocket stays warm and the script process doesn't go idle.
        This will NOT keep the Streamlit Community Cloud *app itself* from
-       sleeping when no one is connected — for that, set up UptimeRobot
+       sleeping when no one is connected - for that, set up UptimeRobot
        (free) on https://<your-app>.streamlit.app/ at 5-min intervals. */
     function setupStreamlitKeepAlive() {
         try {
@@ -669,7 +669,7 @@ textarea {
                         .catch(function () {});
                 }, 25000);
             }
-        } catch (e) { /* cross-origin — ignore */ }
+        } catch (e) { /* cross-origin - ignore */ }
     }
     setupStreamlitKeepAlive();
 })();
