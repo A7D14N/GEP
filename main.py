@@ -19,7 +19,11 @@ st.markdown(
         .block-container { padding: 0 !important; max-width: 100% !important; gap: 0 !important; }
         .stApp { background: #0d0020; }
         section.main > div:first-child { padding-top: 0 !important; padding-bottom: 0 !important; }
-        iframe { width: 100% !important; border: none !important; }
+        iframe {
+            width: 100% !important;
+            border: none !important;
+            display: block !important;
+        }
     </style>
     """,
     unsafe_allow_html=True,
@@ -364,6 +368,20 @@ textarea { min-height: 120px; resize: vertical; }
         } catch (e) {}
     }
     setupStreamlitKeepAlive();
+
+    function postHeight() {
+        var h = Math.max(
+            document.documentElement.scrollHeight,
+            document.body.scrollHeight
+        );
+        try { window.parent.postMessage({ type: 'streamlit:setFrameHeight', height: h }, '*'); } catch (e) {}
+    }
+    postHeight();
+    window.addEventListener('load', postHeight);
+    window.addEventListener('resize', postHeight);
+    if (typeof ResizeObserver !== 'undefined') {
+        new ResizeObserver(postHeight).observe(document.body);
+    }
 })();
 </script>
 </body>
