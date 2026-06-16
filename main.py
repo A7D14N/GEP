@@ -1,27 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<!--
-    Learn Guitar - Music Of The Spheres
-    Single-file enquiry form, mobile-first.
 
-    SETUP
-    -----
-    1. Find "your-email@example.com" (occurs in the <form action="..."> below
-       AND in the FORM_ENDPOINT constant in the <script> below) and replace it
-       with Mizarolli's real email. The first time the form is submitted,
-       formsubmit.co will email a confirmation link - click it once to activate.
-       (formsubmit.co is a free form-to-email service, no signup required.)
-    2. The redirect target (https://www.mizarolli.net/) and the thank-you copy
-       are at the top of the <script> block - change them there if needed.
-
-    STREAMLIT KEEP-ALIVE
-    --------------------
-    The script at the bottom pings /_stcore/health every 25s while the page
-    is open in a Streamlit iframe. This keeps the WebSocket warm during a
-    session. It will NOT stop the Streamlit Community Cloud free tier from
-    sleeping when nobody is connected - for that, point UptimeRobot (free)
-    at https://<your-app>.streamlit.app/ on a 5-minute interval.
--->
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
