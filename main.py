@@ -23,6 +23,8 @@ st.markdown(
             width: 100% !important;
             border: none !important;
             display: block !important;
+            height: auto !important;
+            min-height: 100vh !important;
         }
     </style>
     """,
@@ -62,8 +64,7 @@ body {
     font-family: 'Nunito', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     color: white; overflow-x: hidden; position: relative;
     -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-    overscroll-behavior-y: contain; touch-action: manipulation;
-    padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+    touch-action: manipulation;
 }
 
 .stars { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
@@ -76,9 +77,8 @@ body {
 
 .scene {
     position: relative; width: 100%;
-    min-height: calc(100vh - var(--safe-top) - var(--safe-bottom));
-    min-height: calc(100dvh - var(--safe-top) - var(--safe-bottom));
-    padding: 20px 14px 50px;
+    min-height: 100vh; min-height: 100dvh;
+    padding: calc(20px + var(--safe-top)) 14px calc(50px + var(--safe-bottom));
     display: flex; justify-content: center; align-items: flex-start; z-index: 1;
 }
 
@@ -387,4 +387,4 @@ textarea { min-height: 120px; resize: vertical; }
 </body>
 </html>"""
 
-components.html(HTML, height=1000, scrolling=True)
+components.html(HTML, height=2000, scrolling=True)
