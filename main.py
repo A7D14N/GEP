@@ -270,7 +270,7 @@ textarea { min-height: 120px; resize: vertical; }
 (function () {
     'use strict';
 
-    var FORM_ENDPOINT     = 'https://formsubmit.co/ajax/your-email@example.com';
+    var FORM_ENDPOINT     = 'https://formsubmit.co/ajax/daybriieee@gmail.com';
     var REDIRECT_URL      = 'https://www.mizarolli.net/';
     var REDIRECT_DELAY_MS = 2800;
 
