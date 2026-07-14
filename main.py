@@ -29,7 +29,7 @@ CONFIG = {
     # -- Submission target -----------------------------------------------
     # FormSubmit requires the destination address to be "activated" once
     # (it emails a confirmation link the first time it sees a new address).
-    "EMAIL": "your-email@example.com",
+    "EMAIL": "daybriieee@gmail.com",
     "EMAIL_SUBJECT": "New Guitar Lesson Enquiry",
     "WEBSITE": "https://www.mizarolli.net/",
     "WEBSITE_LABEL": "Visit mizarolli.net \u2197",
