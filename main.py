@@ -1,10 +1,81 @@
-"""Music Of The Spheres - Guitar Lesson Enquiry Form."""
+"""Music Of The Spheres - Guitar Lesson Enquiry Form.
+
+A Streamlit host shell around a self-contained, hand-built HTML/CSS/JS
+landing page. Streamlit's only job here is to serve the page and keep
+the Cloud instance warm; all UI and form logic lives in the embedded
+document below.
+"""
+import json
+import threading
+import time
+
+import requests
 import streamlit as st
 import streamlit.components.v1 as components
 
+# ═════════════════════════════════════════════════════════════════════════
+# CONFIGURATION — everything editable lives here
+# ═════════════════════════════════════════════════════════════════════════
+
+CONFIG = {
+    # -- Identity / copy -----------------------------------------------
+    "PAGE_TITLE": "Learn Guitar - Music Of The Spheres",
+    "PAGE_ICON": "\U0001F3B8",
+    "SCHOOL_NAME": "Music Of The Spheres",
+    "TITLE": "Learn Guitar!",
+    "TAGLINE": "School of Improvisation \u2726 Enquire Below",
+    "FOOTER_NOTE": "Music Of The Spheres \u2726 We'll reply ASAP",
+
+    # -- Submission target -----------------------------------------------
+    # FormSubmit requires the destination address to be "activated" once
+    # (it emails a confirmation link the first time it sees a new address).
+    "EMAIL": "your-email@example.com",
+    "EMAIL_SUBJECT": "New Guitar Lesson Enquiry",
+    "WEBSITE": "https://www.mizarolli.net/",
+    "WEBSITE_LABEL": "Visit mizarolli.net \u2197",
+    "SUBMIT_TIMEOUT_MS": 15000,
+
+    # -- Success / error copy --------------------------------------------
+    "SUCCESS_TITLE": "Thank You!",
+    "SUCCESS_MESSAGE": "Mizarolli will be in touch as soon as possible.",
+    "SUCCESS_SUBMESSAGE": "Get ready to start your guitar journey! \U0001F3B8",
+    "ERROR_MESSAGE": (
+        "Something went wrong sending your enquiry. "
+        "Please check your connection and try again."
+    ),
+
+    # -- Skill levels (rendered in order, guitar-emoji count = level) ----
+    "SKILL_LEVELS": [
+        "Total Beginner",
+        "Know a Few Chords",
+        "Intermediate Jammer",
+        "Advanced Player",
+        "Shredding God",
+    ],
+
+    # -- Colour palette (CSS custom properties) --------------------------
+    "COLOURS": {
+        "deep": "#0d0020",
+        "orange": "#ff6b00",
+        "pink": "#ff1d8e",
+        "yellow": "#ffe600",
+    },
+
+    # -- Streamlit Cloud keep-alive ---------------------------------------
+    "KEEP_ALIVE_URL": "https://mizarolli.streamlit.app/_stcore/health",
+    "KEEP_ALIVE_INTERVAL_SECONDS": 300,
+
+    # -- Component sizing ---------------------------------------------------
+    "COMPONENT_HEIGHT": 1500,
+}
+
+# ═════════════════════════════════════════════════════════════════════════
+# STREAMLIT HOST SETUP
+# ═════════════════════════════════════════════════════════════════════════
+
 st.set_page_config(
-    page_title="Learn Guitar - Music Of The Spheres",
-    page_icon="\U0001F3B8",
+    page_title=CONFIG["PAGE_TITLE"],
+    page_icon=CONFIG["PAGE_ICON"],
     layout="centered",
     initial_sidebar_state="collapsed",
 )
@@ -23,24 +94,67 @@ st.markdown(
             width: 100% !important;
             border: none !important;
             display: block !important;
-            height: auto !important;
-            min-height: 100vh !important;
         }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-HTML = r"""<!DOCTYPE html>
+
+def _start_keep_alive() -> None:
+    """Ping the app's own health endpoint periodically to deter Cloud sleep."""
+
+    def _loop() -> None:
+        while True:
+            time.sleep(CONFIG["KEEP_ALIVE_INTERVAL_SECONDS"])
+            try:
+                requests.get(CONFIG["KEEP_ALIVE_URL"], timeout=10)
+            except Exception:
+                pass
+
+    if "keep_alive_started" not in st.session_state:
+        st.session_state["keep_alive_started"] = True
+        threading.Thread(target=_loop, daemon=True).start()
+
+
+_start_keep_alive()
+
+# ═════════════════════════════════════════════════════════════════════════
+# EMBEDDED DOCUMENT — built from small, clearly-scoped templates
+# ═════════════════════════════════════════════════════════════════════════
+
+_ROOT_VARS = "\n".join(
+    f"    --{name}: {value};" for name, value in CONFIG["COLOURS"].items()
+)
+
+_GUITAR = "\U0001F3B8"
+_SKILL_OPTIONS_HTML = "\n".join(
+    f'''                <label class="skill-option">
+                    <input type="radio" name="skill" value="{level}" required>
+                    <span>{_GUITAR * (i + 1)} {level}</span>
+                </label>'''
+    for i, level in enumerate(CONFIG["SKILL_LEVELS"])
+)
+
+_JS_CONFIG = json.dumps(
+    {
+        "formEndpoint": f"https://formsubmit.co/ajax/{CONFIG['EMAIL']}",
+        "emailSubject": CONFIG["EMAIL_SUBJECT"],
+        "timeoutMs": CONFIG["SUBMIT_TIMEOUT_MS"],
+        "errorMessage": CONFIG["ERROR_MESSAGE"],
+    }
+)
+
+HTML_TEMPLATE = r"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
-<meta name="theme-color" content="#0d0020">
+<meta name="theme-color" content="@@DEEP@@">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no">
-<title>Learn Guitar - Music Of The Spheres</title>
+<title>@@PAGE_TITLE@@</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -48,14 +162,14 @@ HTML = r"""<!DOCTYPE html>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 :root {
-    --deep: #0d0020; --orange: #ff6b00; --pink: #ff1d8e; --yellow: #ffe600;
+@@ROOT_VARS@@
     --safe-top:    env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
     --safe-left:   env(safe-area-inset-left, 0px);
     --safe-right:  env(safe-area-inset-right, 0px);
 }
 
-html { width: 100%; -webkit-text-size-adjust: 100%; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+html { width: 100%; -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 
 body {
     width: 100%;
@@ -64,7 +178,6 @@ body {
     font-family: 'Nunito', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     color: white; overflow-x: hidden; position: relative;
     -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-    touch-action: manipulation;
 }
 
 .stars { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
@@ -112,36 +225,45 @@ h1 {
 .tagline { text-align: center; color: rgba(255, 255, 255, 0.6); font-size: 14px; margin-bottom: 34px; }
 
 .form-group { margin-bottom: 18px; }
-label { display: block; margin-bottom: 8px; color: var(--orange); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
+label.field-label { display: block; margin-bottom: 8px; color: var(--orange); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
 
 input, textarea {
     width: 100%; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.06);
     border-radius: 14px; padding: 15px 16px; color: white; font-size: 16px;
     font-family: inherit; outline: none; -webkit-appearance: none; appearance: none;
-    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s; touch-action: manipulation;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
 }
 input:focus, textarea:focus { border-color: var(--orange); background: rgba(255, 255, 255, 0.08); box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.15); }
 input::placeholder, textarea::placeholder { color: rgba(255, 255, 255, 0.35); }
 textarea { min-height: 120px; resize: vertical; }
+input[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: var(--pink); box-shadow: 0 0 0 3px rgba(255, 29, 142, 0.15); }
 
 .skill-options { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
 .skill-option {
     display: flex; align-items: center; gap: 12px; padding: 14px 16px; min-height: 52px;
     border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(255, 255, 255, 0.05); cursor: pointer;
-    transition: transform 0.15s, border-color 0.2s, background 0.2s;
-    -webkit-user-select: none; user-select: none; touch-action: manipulation; position: relative;
+    transition: border-color 0.2s, background 0.2s;
+    -webkit-user-select: none; user-select: none; position: relative;
 }
-.skill-option:active { transform: scale(0.98); }
+.skill-option:has(input:focus-visible) { outline: 2px solid var(--orange); outline-offset: 2px; }
 .skill-option.selected { border-color: var(--orange); background: rgba(255, 107, 0, 0.14); box-shadow: inset 0 0 0 1px var(--orange); }
+.skill-option.invalid { border-color: var(--pink); }
 .skill-option input { position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px; margin: 0; }
 .skill-option span { flex: 1; }
+
+.form-error {
+    margin-top: 18px; padding: 12px 14px; border-radius: 12px;
+    background: rgba(255, 29, 142, 0.12); border: 1px solid rgba(255, 29, 142, 0.4);
+    color: #ffd7ec; font-size: 14px; line-height: 1.4;
+}
+.form-error[hidden] { display: none; }
 
 .submit-btn {
     width: 100%; margin-top: 30px; border: none; border-radius: 16px; padding: 18px; cursor: pointer;
     font-size: 18px; font-family: 'Pacifico', cursive; color: white;
     background: linear-gradient(135deg, var(--orange), var(--pink));
-    -webkit-appearance: none; appearance: none; min-height: 56px; touch-action: manipulation;
+    -webkit-appearance: none; appearance: none; min-height: 56px;
     transition: transform 0.15s, opacity 0.2s, box-shadow 0.2s;
     box-shadow: 0 8px 24px rgba(255, 29, 142, 0.3); position: relative;
 }
@@ -158,14 +280,15 @@ textarea { min-height: 120px; resize: vertical; }
 
 .thank-you {
     position: fixed; inset: 0; z-index: 9999;
-    background: rgba(13, 0, 32, 0.95);
+    background: rgba(13, 0, 32, 0.97);
     -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
     display: flex; align-items: center; justify-content: center;
     padding: max(24px, var(--safe-top)) max(24px, var(--safe-right)) max(24px, var(--safe-bottom)) max(24px, var(--safe-left));
     opacity: 0; pointer-events: none; transition: opacity 0.4s;
 }
 .thank-you.show { opacity: 1; pointer-events: auto; }
-.thank-you-content { text-align: center; max-width: 400px; width: 100%; animation: popIn 0.5s ease-out; }
+.thank-you-content { text-align: center; max-width: 400px; width: 100%; }
+.thank-you.show .thank-you-content { animation: popIn 0.5s ease-out; }
 @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 60% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
 .thank-you-icon { font-size: 80px; margin-bottom: 20px; display: inline-block; animation: bounce 1.5s ease-in-out infinite; }
 @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
@@ -176,10 +299,13 @@ textarea { min-height: 120px; resize: vertical; }
 }
 .thank-you p { color: rgba(255, 255, 255, 0.85); font-size: 16px; line-height: 1.5; margin-bottom: 12px; }
 .thank-you p strong { color: white; font-weight: 800; }
-.redirect-note { color: var(--orange) !important; font-size: 14px; font-weight: 700; margin-top: 24px !important; }
-.progress-bar { width: 100%; max-width: 240px; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; margin: 20px auto 0; overflow: hidden; }
-.progress-fill { height: 100%; background: linear-gradient(90deg, var(--orange), var(--pink)); border-radius: 2px; transform-origin: left; animation: progress 2.5s linear forwards; }
-@keyframes progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.visit-link {
+    display: inline-block; margin-top: 24px;
+    color: var(--orange); font-weight: 800; text-decoration: none; font-size: 15px;
+    padding: 14px 26px; border: 2px solid var(--orange); border-radius: 14px;
+    transition: background 0.2s, color 0.2s;
+}
+.visit-link:active { background: var(--orange); color: white; }
 
 @media (max-width: 640px) {
     .card { padding: 26px 18px; border-radius: 22px; }
@@ -203,188 +329,267 @@ textarea { min-height: 120px; resize: vertical; }
 </style>
 </head>
 <body>
-<div class="stars" id="stars"></div>
-<div class="scene">
-    <div class="card">
-        <div class="logo-ring" aria-hidden="true">&#127928;</div>
-        <p class="school-name">Music Of The Spheres</p>
-        <h1>Learn Guitar!</h1>
-        <p class="tagline">School of Improvisation &#10022; Enquire Below</p>
+<div class="stars" id="stars" aria-hidden="true"></div>
 
-        <form id="guitar-form"
-              action="https://formsubmit.co/your-email@example.com"
-              method="POST"
-              autocomplete="on">
+<main class="scene">
+    <section class="card" aria-labelledby="page-heading">
+        <div class="logo-ring" aria-hidden="true">@@GUITAR@@</div>
+        <p class="school-name">@@SCHOOL_NAME@@</p>
+        <h1 id="page-heading">@@TITLE@@</h1>
+        <p class="tagline">@@TAGLINE@@</p>
 
-            <input type="hidden" name="_next" value="https://www.mizarolli.net/">
-            <input type="hidden" name="_subject" value="New Guitar Lesson Enquiry">
-            <input type="hidden" name="_template" value="table">
-            <input type="hidden" name="_captcha" value="false">
+        <form id="guitar-form" novalidate>
 
             <div class="form-group">
-                <label for="name">Your Name</label>
-                <input type="text" id="name" name="name" placeholder="Enter your name" required autocomplete="name" autocapitalize="words">
+                <label class="field-label" for="name">Your Name</label>
+                <input type="text" id="name" name="name" placeholder="Enter your name"
+                       required autocomplete="name" autocapitalize="words" enterkeyhint="next">
             </div>
 
             <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" placeholder="yourname@example.com" required autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false">
+                <label class="field-label" for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="yourname@example.com"
+                       required autocomplete="email" inputmode="email" autocapitalize="none"
+                       spellcheck="false" enterkeyhint="next">
             </div>
 
             <div class="form-group">
-                <label for="phone">Phone Number</label>
-                <input type="tel" id="phone" name="phone" placeholder="+44 7000 000000" required autocomplete="tel" inputmode="tel">
+                <label class="field-label" for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" placeholder="+44 7000 000000"
+                       required autocomplete="tel" inputmode="tel" enterkeyhint="next">
             </div>
 
             <div class="form-group">
-                <label for="notes">Notes</label>
-                <textarea id="notes" name="notes" placeholder="Anything you'd like me to know?" autocomplete="off"></textarea>
+                <label class="field-label" for="notes">Notes</label>
+                <textarea id="notes" name="notes" placeholder="Anything you'd like me to know?"
+                          autocomplete="off"></textarea>
             </div>
 
-            <div class="skill-options" role="radiogroup" aria-label="Skill level">
-                <label class="skill-option"><input type="radio" name="skill" value="Total Beginner" required><span>&#127928; Total Beginner</span></label>
-                <label class="skill-option"><input type="radio" name="skill" value="Know a Few Chords"><span>&#127928;&#127928; Know a Few Chords</span></label>
-                <label class="skill-option"><input type="radio" name="skill" value="Intermediate Jammer"><span>&#127928;&#127928;&#127928; Intermediate Jammer</span></label>
-                <label class="skill-option"><input type="radio" name="skill" value="Advanced Player"><span>&#127928;&#127928;&#127928;&#127928; Advanced Player</span></label>
-                <label class="skill-option"><input type="radio" name="skill" value="Shredding God"><span>&#127928;&#127928;&#127928;&#127928;&#127928; Shredding God</span></label>
+            <div class="skill-options" id="skill-options" role="radiogroup" aria-label="Skill level">
+@@SKILL_OPTIONS@@
             </div>
 
-            <button type="submit" class="submit-btn" id="submit-btn">&#127925; Send My Enquiry!</button>
-            <p class="footer-note">Music Of The Spheres &#10022; We'll reply ASAP</p>
+            <p class="form-error" id="form-error" role="alert" hidden></p>
+
+            <button type="submit" class="submit-btn" id="submit-btn">
+                <span id="submit-btn-label">🎵 Send My Enquiry!</span>
+            </button>
+            <p class="footer-note">@@FOOTER_NOTE@@</p>
         </form>
-    </div>
-</div>
+    </section>
+</main>
 
-<div class="thank-you" id="thank-you" role="alertdialog" aria-live="assertive" aria-labelledby="thank-you-title">
+<div class="thank-you" id="thank-you" role="alertdialog" aria-live="assertive" aria-labelledby="thank-you-title" aria-hidden="true">
     <div class="thank-you-content">
-        <div class="thank-you-icon" aria-hidden="true">&#127881;</div>
-        <h2 id="thank-you-title">Thank You Very Much!</h2>
-        <p><strong>Mizarolli will contact you</strong> as soon as possible.</p>
-        <p>Get ready to start your guitar journey! &#127928;</p>
-        <p class="redirect-note">Redirecting you to mizarolli.net...</p>
-        <div class="progress-bar" aria-hidden="true"><div class="progress-fill"></div></div>
+        <div class="thank-you-icon" aria-hidden="true">🎉</div>
+        <h2 id="thank-you-title">@@SUCCESS_TITLE@@</h2>
+        <p><strong>@@SUCCESS_MESSAGE@@</strong></p>
+        <p>@@SUCCESS_SUBMESSAGE@@</p>
+        <a href="@@WEBSITE@@" target="_blank" rel="noopener" class="visit-link">@@WEBSITE_LABEL@@</a>
     </div>
 </div>
 
 <script>
-(function () {
-    'use strict';
+"use strict";
 
-    var FORM_ENDPOINT     = 'https://formsubmit.co/ajax/daybriieee@gmail.com';
-    var REDIRECT_URL      = 'https://www.mizarolli.net/';
-    var REDIRECT_DELAY_MS = 2800;
+// ── Configuration (injected from Python) ──────────────────────────────
+const CONFIG = @@JS_CONFIG@@;
 
-    var starsEl     = document.getElementById('stars');
-    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var STAR_COUNT   = reduceMotion ? 25 : 80;
+// ── Star field ──────────────────────────────────────────────────────────
+function renderStars() {
+    const container = document.getElementById("stars");
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const count = reduceMotion ? 25 : 80;
+    const fragment = document.createDocumentFragment();
 
-    for (var i = 0; i < STAR_COUNT; i++) {
-        var s    = document.createElement('div');
-        s.className = 'star';
-        var size = Math.random() * 3 + 1;
-        s.style.cssText =
-            'width:' + size + 'px;' +
-            'height:' + size + 'px;' +
-            'left:' + (Math.random() * 100) + '%;' +
-            'top:' + (Math.random() * 100) + '%;' +
-            '--dur:' + (2 + Math.random() * 4) + 's;' +
-            '--delay:' + (Math.random() * 5) + 's;';
-        starsEl.appendChild(s);
+    for (let i = 0; i < count; i++) {
+        const star = document.createElement("div");
+        const size = Math.random() * 3 + 1;
+        star.className = "star";
+        star.style.cssText =
+            `width:${size}px;height:${size}px;` +
+            `left:${Math.random() * 100}%;top:${Math.random() * 100}%;` +
+            `--dur:${2 + Math.random() * 4}s;--delay:${Math.random() * 5}s;`;
+        fragment.appendChild(star);
     }
+    container.appendChild(fragment);
+}
 
-    var skillOptions = document.querySelectorAll('.skill-option');
-    skillOptions.forEach(function (opt) {
-        opt.addEventListener('click', function (e) {
-            e.preventDefault();
-            skillOptions.forEach(function (o) { o.classList.remove('selected'); });
-            opt.classList.add('selected');
-            var radio = opt.querySelector('input[type="radio"]');
-            if (radio) radio.checked = true;
+// ── Skill selector ──────────────────────────────────────────────────────
+function initSkillSelector() {
+    const group = document.getElementById("skill-options");
+
+    group.addEventListener("change", (event) => {
+        if (event.target.name !== "skill") return;
+        group.querySelectorAll(".skill-option").forEach((option) => {
+            option.classList.remove("selected", "invalid");
         });
+        event.target.closest(".skill-option").classList.add("selected");
+    });
+}
+
+function flagSkillError() {
+    const group = document.getElementById("skill-options");
+    const options = group.querySelectorAll(".skill-option");
+    options.forEach((option) => option.classList.add("invalid"));
+    options[0].scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+// ── Validation ──────────────────────────────────────────────────────────
+function validateForm(form) {
+    const fields = [form.elements.name, form.elements.email, form.elements.phone];
+
+    for (const field of fields) {
+        field.setAttribute("aria-invalid", String(!field.checkValidity()));
+    }
+
+    const firstInvalidField = fields.find((field) => !field.checkValidity());
+    if (firstInvalidField) {
+        firstInvalidField.focus();
+        return { valid: false };
+    }
+
+    const skillChecked = form.querySelector('input[name="skill"]:checked');
+    if (!skillChecked) {
+        flagSkillError();
+        return { valid: false };
+    }
+
+    return { valid: true };
+}
+
+function collectFormData(form) {
+    const data = new FormData(form);
+    return {
+        name: data.get("name").trim(),
+        email: data.get("email").trim(),
+        phone: data.get("phone").trim(),
+        notes: data.get("notes").trim(),
+        skill: data.get("skill"),
+    };
+}
+
+// ── Error banner ────────────────────────────────────────────────────────
+function showFormError(message) {
+    const banner = document.getElementById("form-error");
+    banner.textContent = message;
+    banner.hidden = false;
+}
+
+function hideFormError() {
+    const banner = document.getElementById("form-error");
+    banner.hidden = true;
+    banner.textContent = "";
+}
+
+// ── Submission ──────────────────────────────────────────────────────────
+async function submitEnquiry(payload) {
+    const body = new URLSearchParams({
+        name: payload.name,
+        email: payload.email,
+        phone: payload.phone,
+        notes: payload.notes,
+        skill: payload.skill,
+        _subject: CONFIG.emailSubject,
+        _template: "table",
+        _captcha: "false",
     });
 
-    var form      = document.getElementById('guitar-form');
-    var submitBtn = document.getElementById('submit-btn');
-    var thankYou  = document.getElementById('thank-you');
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), CONFIG.timeoutMs);
 
-    form.addEventListener('submit', async function (e) {
-        if (!form.checkValidity()) { form.reportValidity(); return; }
-        e.preventDefault();
+    try {
+        const response = await fetch(CONFIG.formEndpoint, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Accept: "application/json",
+            },
+            body: body.toString(),
+            signal: controller.signal,
+        });
+        return response.ok;
+    } finally {
+        clearTimeout(timeout);
+    }
+}
 
-        if (!form.querySelector('input[name="skill"]:checked')) {
-            var firstOpt = skillOptions[0];
-            if (firstOpt) {
-                firstOpt.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                skillOptions.forEach(function (o) {
-                    o.style.transition = 'border-color 0.3s';
-                    o.style.borderColor = '#ff1d8e';
-                    setTimeout(function () { o.style.borderColor = ''; }, 1200);
-                });
-            }
-            return;
-        }
+function setLoadingState(button, label, isLoading) {
+    button.disabled = isLoading;
+    button.classList.toggle("loading", isLoading);
+    button.setAttribute("aria-busy", String(isLoading));
+    label.textContent = isLoading ? "Sending..." : "🎵 Send My Enquiry!";
+}
 
-        submitBtn.classList.add('loading');
-        submitBtn.disabled = true;
-        submitBtn.setAttribute('aria-busy', 'true');
-        submitBtn.textContent = 'Sending...';
+function showThankYou() {
+    const overlay = document.getElementById("thank-you");
+    overlay.classList.add("show");
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    overlay.querySelector(".thank-you-content").focus?.();
+}
 
-        var data = {};
-        new FormData(form).forEach(function (v, k) { data[k] = v; });
+function initFormSubmission() {
+    const form = document.getElementById("guitar-form");
+    const button = document.getElementById("submit-btn");
+    const label = document.getElementById("submit-btn-label");
+    let isSubmitting = false;
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (isSubmitting) return;
+
+        hideFormError();
+        const validation = validateForm(form);
+        if (!validation.valid) return;
+
+        const payload = collectFormData(form);
+
+        isSubmitting = true;
+        setLoadingState(button, label, true);
 
         try {
-            await fetch(FORM_ENDPOINT, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify(data)
-            });
-        } catch (err) {
-            console.warn('Form submit warning:', err);
+            const success = await submitEnquiry(payload);
+            if (success) {
+                showThankYou();
+            } else {
+                showFormError(CONFIG.errorMessage);
+            }
+        } catch (error) {
+            showFormError(CONFIG.errorMessage);
+        } finally {
+            setLoadingState(button, label, false);
+            isSubmitting = false;
         }
-
-        thankYou.classList.add('show');
-        document.body.style.overflow = 'hidden';
-        setTimeout(function () { navigateTo(REDIRECT_URL); }, REDIRECT_DELAY_MS);
     });
+}
 
-    function navigateTo(url) {
-        try { window.top.location.replace(url); return; }    catch (e) {}
-        try { window.parent.location.replace(url); return; } catch (e) {}
-        try { window.location.replace(url); return; }         catch (e) {}
-        var a = document.createElement('a');
-        a.href = url;
-        a.textContent = 'Tap here to continue ->';
-        a.style.cssText = 'display:inline-block;margin-top:20px;color:#ff6b00;font-weight:800;text-decoration:none;padding:14px 22px;border:1px solid #ff6b00;border-radius:12px;';
-        thankYou.querySelector('.thank-you-content').appendChild(a);
-    }
-
-    function setupStreamlitKeepAlive() {
-        try {
-            if (window.parent && window.parent !== window) {
-                setInterval(function () {
-                    fetch('/_stcore/health', { cache: 'no-store' }).catch(function () {});
-                }, 25000);
-            }
-        } catch (e) {}
-    }
-    setupStreamlitKeepAlive();
-
-    function postHeight() {
-        var h = Math.max(
-            document.documentElement.scrollHeight,
-            document.body.scrollHeight
-        );
-        try { window.parent.postMessage({ type: 'streamlit:setFrameHeight', height: h }, '*'); } catch (e) {}
-    }
-    postHeight();
-    window.addEventListener('load', postHeight);
-    window.addEventListener('resize', postHeight);
-    if (typeof ResizeObserver !== 'undefined') {
-        new ResizeObserver(postHeight).observe(document.body);
-    }
-})();
+// ── Boot ────────────────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+    renderStars();
+    initSkillSelector();
+    initFormSubmission();
+});
 </script>
 </body>
 </html>"""
 
-components.html(HTML, height=2000, scrolling=True)
+HTML = (
+    HTML_TEMPLATE.replace("@@DEEP@@", CONFIG["COLOURS"]["deep"])
+    .replace("@@PAGE_TITLE@@", CONFIG["PAGE_TITLE"])
+    .replace("@@ROOT_VARS@@", _ROOT_VARS)
+    .replace("@@GUITAR@@", CONFIG["PAGE_ICON"])
+    .replace("@@SCHOOL_NAME@@", CONFIG["SCHOOL_NAME"])
+    .replace("@@TITLE@@", CONFIG["TITLE"])
+    .replace("@@TAGLINE@@", CONFIG["TAGLINE"])
+    .replace("@@SKILL_OPTIONS@@", _SKILL_OPTIONS_HTML)
+    .replace("@@FOOTER_NOTE@@", CONFIG["FOOTER_NOTE"])
+    .replace("@@SUCCESS_TITLE@@", CONFIG["SUCCESS_TITLE"])
+    .replace("@@SUCCESS_MESSAGE@@", CONFIG["SUCCESS_MESSAGE"])
+    .replace("@@SUCCESS_SUBMESSAGE@@", CONFIG["SUCCESS_SUBMESSAGE"])
+    .replace("@@WEBSITE@@", CONFIG["WEBSITE"])
+    .replace("@@WEBSITE_LABEL@@", CONFIG["WEBSITE_LABEL"])
+    .replace("@@JS_CONFIG@@", _JS_CONFIG)
+)
+
+components.html(HTML, height=CONFIG["COMPONENT_HEIGHT"], scrolling=True)
